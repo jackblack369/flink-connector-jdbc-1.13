@@ -22,6 +22,8 @@ import org.apache.flink.connector.jdbc.internal.converter.JdbcRowConverter;
 import org.apache.flink.connector.jdbc.statement.FieldNamedPreparedStatement;
 import org.apache.flink.connector.jdbc.statement.StatementFactory;
 import org.apache.flink.table.data.RowData;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.sql.Connection;
 import java.sql.SQLException;
@@ -33,6 +35,7 @@ import static org.apache.flink.util.Preconditions.checkNotNull;
  * java.sql.PreparedStatement} and doesn't buffer records in memory. Only used in Table/SQL API.
  */
 public final class TableSimpleStatementExecutor implements JdbcBatchStatementExecutor<RowData> {
+    private final Logger LOG = LoggerFactory.getLogger(TableSimpleStatementExecutor.class);
 
     private final StatementFactory stmtFactory;
     private final JdbcRowConverter converter;
@@ -51,6 +54,7 @@ public final class TableSimpleStatementExecutor implements JdbcBatchStatementExe
     @Override
     public void prepareStatements(Connection connection) throws SQLException {
         st = stmtFactory.createStatement(connection);
+        LOG.info("simple statement:[{}]");
     }
 
     @Override

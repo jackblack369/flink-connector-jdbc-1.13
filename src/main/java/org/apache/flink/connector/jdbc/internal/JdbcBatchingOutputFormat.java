@@ -160,9 +160,11 @@ public class JdbcBatchingOutputFormat<
 
         try {
             addToBatch(record, jdbcRecordExtractor.apply(record));
+            LOG.info("add record to batch:[{}]", record);
             batchCount++;
             if (executionOptions.getBatchSize() > 0
                     && batchCount >= executionOptions.getBatchSize()) {
+                LOG.info("batchsize is:[{}], begin flush batch record", executionOptions.getBatchSize());
                 flush();
             }
         } catch (Exception e) {
@@ -185,6 +187,11 @@ public class JdbcBatchingOutputFormat<
                 break;
             } catch (SQLException e) {
                 LOG.error("JDBC executeBatch error, retry times = {}", i, e);
+
+                if (e.getNextException() !=null){
+                    LOG.error("nextException:", e.getNextException());
+                }
+
                 if (i >= executionOptions.getMaxRetries()) {
                     throw new IOException(e);
                 }

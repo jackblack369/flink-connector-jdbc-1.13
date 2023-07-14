@@ -39,6 +39,8 @@ import org.apache.flink.table.data.RowData;
 import org.apache.flink.table.types.DataType;
 import org.apache.flink.table.types.logical.LogicalType;
 import org.apache.flink.table.types.logical.RowType;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.Serializable;
 import java.util.Arrays;
@@ -50,6 +52,7 @@ import static org.apache.flink.util.Preconditions.checkNotNull;
 
 /** Builder for {@link JdbcBatchingOutputFormat} for Table/SQL. */
 public class JdbcDynamicOutputFormatBuilder implements Serializable {
+    private static final Logger LOG = LoggerFactory.getLogger(JdbcDynamicOutputFormatBuilder.class);
 
     private static final long serialVersionUID = 1L;
 
@@ -188,6 +191,7 @@ public class JdbcDynamicOutputFormatBuilder implements Serializable {
             int[] pkFields,
             String[] pkNames,
             LogicalType[] pkTypes) {
+        LOG.info("do createUpsertRowExecutor");
         return dialect.getUpsertStatement(tableName, fieldNames, pkNames)
                 .map(sql -> createSimpleRowExecutor(dialect, fieldNames, fieldTypes, sql))
                 .orElseGet(
@@ -211,6 +215,7 @@ public class JdbcDynamicOutputFormatBuilder implements Serializable {
     private static JdbcBatchStatementExecutor<RowData> createSimpleRowExecutor(
             JdbcDialect dialect, String[] fieldNames, LogicalType[] fieldTypes, final String sql) {
         final JdbcRowConverter rowConverter = dialect.getRowConverter(RowType.of(fieldTypes));
+        LOG.info("do createSimpleRowExecutor");
         return new TableSimpleStatementExecutor(
                 connection ->
                         FieldNamedPreparedStatement.prepareStatement(connection, sql, fieldNames),
@@ -225,6 +230,7 @@ public class JdbcDynamicOutputFormatBuilder implements Serializable {
             int[] pkFields,
             String[] pkNames,
             LogicalType[] pkTypes) {
+        LOG.info("do createInsertOrUpdateExecutor");
         final String existStmt = dialect.getRowExistsStatement(tableName, pkNames);
         final String insertStmt = dialect.getInsertIntoStatement(tableName, fieldNames);
         final String updateStmt = dialect.getUpdateStatement(tableName, fieldNames, pkNames);

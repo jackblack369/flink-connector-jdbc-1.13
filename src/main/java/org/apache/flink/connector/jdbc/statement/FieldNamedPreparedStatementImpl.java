@@ -18,6 +18,9 @@
 
 package org.apache.flink.connector.jdbc.statement;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.math.BigDecimal;
 import java.sql.Connection;
 import java.sql.Date;
@@ -36,6 +39,8 @@ import static org.apache.flink.util.Preconditions.checkNotNull;
 
 /** Simple implementation of {@link FieldNamedPreparedStatement}. */
 public class FieldNamedPreparedStatementImpl implements FieldNamedPreparedStatement {
+
+    private static final Logger LOG = LoggerFactory.getLogger(FieldNamedPreparedStatementImpl.class);
 
     private final PreparedStatement statement;
     private final int[][] indexMapping;
@@ -188,7 +193,10 @@ public class FieldNamedPreparedStatementImpl implements FieldNamedPreparedStatem
         }
 
         HashMap<String, List<Integer>> parameterMap = new HashMap<>();
+        LOG.debug("prepare statement before parse sql:[{}]", sql);
         String parsedSQL = parseNamedStatement(sql, parameterMap);
+        LOG.debug("prepare statement after parse sql:[{}]", parsedSQL);
+
         // currently, the statements must contain all the field parameters
         checkArgument(parameterMap.size() == fieldNames.length);
         int[][] indexMapping = new int[fieldNames.length][];
